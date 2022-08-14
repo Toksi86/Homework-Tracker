@@ -1,9 +1,10 @@
 import logging
 import os
-
+from turtle import right
 import requests
 import telegram
 import time
+import exceptions as exc
 from dotenv import load_dotenv
 from http import HTTPStatus
 
@@ -17,7 +18,7 @@ PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-RETRY_TIME = 5
+RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -44,34 +45,39 @@ def get_api_answer(current_timestamp):
     params = {'from_date': timestamp}
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
+        if response.status_code == HTTPStatus.OK:
+            return response.json()
+        else:
+            raise exc.SatusCodeNot200
     except Exception as error:
         logging.error(f'Возникла ошибка: {error}')
-    if response.status_code != HTTPStatus.OK:
-        logging.error('Эндпоинт API-сервиса недоступен')
-    else:
-        logging.info('Эндпоинт API-сервиса доступен')
-    return response.json()
+        telegram.Bot(token=TELEGRAM_TOKEN).send_message(
+            f'Возникла ошибка: {error}'
+        )
 
 
 def check_response(response):
     """Проверка ответа API на корректность."""
-    if 'homeworks' in response:
-        return response['homeworks']
-    else:
-        print('Релизовать исключение - неверный контекст')
-        logging.error('Передан неверный контекст')
+    if not isinstance(response, dict):
+        raise TypeError('Функция получила не словарь')
+    if 'homeworks' not in response:
+        raise KeyError('Ключ homewowks отсуствует в словаре')
+    if not isinstance(response['homeworks'], list):
+        raise TypeError('Домашняя работа не в виде словаря')
+    return response['homeworks']
 
 
 def parse_status(homework):
     """Получение статуса домашней работы."""
-    homework_name = homework['lesson_name']
+    homework_name = homework['homework_name']
     homework_status = homework['status']
-
     if homework_status in HOMEWORK_STATUSES:
         verdict = HOMEWORK_STATUSES[homework_status]
-        return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        message = f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        return message
     else:
         logging.error('Недокументированный статус домашней работы')
+        raise KeyError('Недокументированный статус домашней работы')
 
 
 def check_tokens():
