@@ -1,6 +1,5 @@
 import logging
 import os
-from turtle import right
 import requests
 import telegram
 import time
@@ -73,7 +72,8 @@ def parse_status(homework):
     homework_status = homework['status']
     if homework_status in HOMEWORK_STATUSES:
         verdict = HOMEWORK_STATUSES[homework_status]
-        message = f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        message = (f'Изменился статус '
+                   f'проверки работы "{homework_name}". {verdict}')
         return message
     else:
         logging.error('Недокументированный статус домашней работы')
