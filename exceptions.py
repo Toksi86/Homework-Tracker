@@ -1,14 +1,10 @@
-class SatusCodeNot200(Exception):
-    """Исключение при недоустпности API-сервиса."""
+class SatusCodeNot200Error(Exception):
+    """Exception: API-сервис недоступен."""
 
 
-class DictIsEmpty(Exception):
-    """Исключение при пустом словаре."""
+class SendMsgError(Exception):
+    """Exception: Ошибка отправки сообщения."""
 
 
-class ResponseNotDict(Exception):
-    """Ответ не является словарем."""
-
-
-class HomeworksNotList(Exception):
-    """Ответ не является словарем."""
+class TokenError(Exception):
+    """Exception: Токены пустые или некорректные."""
