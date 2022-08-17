@@ -8,3 +8,7 @@ class SendMsgError(Exception):
 
 class TokenError(Exception):
     """Exception: Токены пустые или некорректные."""
+
+
+class ResponseError(Exception):
+    """Exception: Ошибка при отправе запроса."""
