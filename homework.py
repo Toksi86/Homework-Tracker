@@ -61,11 +61,19 @@ def get_api_answer(current_timestamp):
     try:
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
     except Exception as error:
-        raise exc.ResponseError(error)
-    if response.status_code == HTTPStatus.OK:
-        return response.json()
-    error = f'API-сервис недоступен, код ответа {response.status_code}'
-    raise exc.SatusCodeNot200Error(error)
+        raise exc.ResponseError(
+            f'Запрос на страницу: {ENDPOINT}\n'
+            f'Статус: {response.status_code}\n'
+            f'Хедеры: {HEADERS}\n'
+            f'Параметры: {params}\n'
+            f'Внутрення ошибка: {error}\n'
+        )
+    if response.status_code != HTTPStatus.OK:
+        error = f'API-сервис недоступен, код ответа {response.status_code}'
+        raise exc.SatusCodeNot200Error(
+            f'Внутреняя ошибка: {error}'
+        )
+    return response.json()
 
 
 def check_response(response):
