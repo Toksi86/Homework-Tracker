@@ -1,4 +1,4 @@
-# homework_bot
+# Homework Tracker
 python telegram bot
 
 ## Описание
